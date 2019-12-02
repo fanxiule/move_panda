@@ -41,14 +41,35 @@ The following funcitons are provided by this package:
 
             void setMaxVelScalingFactor(double factor)
 
+  - Change the planner for MoveIt! to the one specified by ``std::string planner``
+
+            void setPlanner(std::string planner);
+
   - Move to the target pose given by ``geometry_msgs::Pose target_pose``
 
             void moveTargetPose(geometry_msgs::Pose target_pose, bool step = true, bool execute = false)
  
   - Note that the default value for ``bool step`` is true and for ``bool execute`` is false. If these two arguments are not specified when calling the method, users need to use the Next button in the GUI tool to proceed to the next operation, and MoveIt! only plans for the motion but does not execute it. This is true for all methods in this package that can move the arm or the gripper
+  
   - Move to the target joint values given by ``std::vector<double> target_joint``
 
             void moveTargetJoint(std::vector<double> target_joint, bool step = true, bool execute = false)
+
+  - Set current end effector orientation as the orienation constraint. ``std::array<double, 3> axis_tolerance`` specifies axis-angle error tolerance in x, y and z axis, respectively. The default tolerance for all thress axes is ``0.1``. ``double weight`` denotes the importance of this constraint relative to other constriants. Default value is ``1.0`` indicating the constraint is very important
+
+            void setHandOrientConstraint(std::array<double, 3> axis_tolerance = {0.1, 0.1, 0.1}, double weight = 1.0)
+
+  - Set current joint value of the given joint ``std::string joint_name`` as a constraint. ``double upper_tol`` and ``double lower_tol`` are the upper and lower tolernces of this constraint. Their default value is ``0.1``. ``double weight`` denotes the importance of this constraint relative to others
+  
+            void setJointConstraint(std::string joint_name, double upper_tol = 0.1, double lower_tol = 0.1, double weight = 1.0); 
+
+  - Move to the target pose given by ``geometry_msgs::Pose target_pose`` with path constraint. ``double plan_time`` overrides the default planning time of the MoveIt! solver. Default value is ``10.0`` seconds
+
+            void moveTargetPoseCon(geometry_msgs::Pose target_pose, bool step = true, bool execute = false, double plan_time = 10.0)
+
+  - Clear all constraints and reset planning time back to the default value.
+
+            void clearPathConstraint()
 
 - **Hand Class**
 
@@ -63,7 +84,11 @@ The following funcitons are provided by this package:
   - Change the maximum joint velocity to number specified in ``double factor``
 
             void setMaxVelScalingFactor(double factor)
-   
+
+  - Change the planner for MoveIt! to the one specified by ``std::string planner``
+
+            void setPlanner(std::string planner);
+
   - Open the gripper completely
 
             void openGripper(bool step = true, bool execute = false)

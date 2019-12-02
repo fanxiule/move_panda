@@ -29,7 +29,7 @@ int main(int argc, char **argv)
   //after planning.
   //If you don't specify them, default is true, false. It means that you
   //will need to use Next and moveit will plan but not execute the motion for you
-   
+
   arm.setMaxVelScalingFactor(0.1);                 //change joint speed
   arm.moveTargetPose(target_pose1, true, true);    //move to target pose
   arm.setMaxVelScalingFactor(1.2);                 //change joint speed, maximum is 1
@@ -40,6 +40,21 @@ int main(int argc, char **argv)
   hand.setMaxVelScalingFactor(1);     //change gripper speed, maximum is 1
   hand.closeGripper(true, true);      //close gripper
   hand.moveGripper(0.02, true, true); //move gripper to target value
+
+  arm_current_pose = arm.getCurrentPose();
+  arm.setHandOrientConstraint(); //set current end effector orientatoin as the constraint
+  arm_current_pose.position.x -= 0.1;
+  arm_current_pose.position.y -= 0.1;
+  arm_current_pose.position.z -= 0.1;
+  arm_current_pose.orientation.w = 1;
+  arm.moveTargetPoseCon(arm_current_pose, true, true); //move to target pose with orientation constraint
+  arm.clearPathConstraint();
+
+  arm.moveTargetJoint(arm.home_joint, false, true);
+  arm.setJointConstraint(arm.joint_names[1]);      //set panda_joint2 value as a joint constraint
+  arm.moveTargetPoseCon(target_pose1, true, true); //move to target pose with joint constraint
+  arm.clearPathConstraint();
+  arm.moveTargetJoint(arm.home_joint, false, true);
 
   ros::shutdown();
   return 0;
