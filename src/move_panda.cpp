@@ -16,6 +16,7 @@ Arm::Arm(const std::string PLANNING_GROUP) : move_group(PLANNING_GROUP), visual_
     home_pose = move_group.getCurrentPose().pose;
     home_joint = move_group.getCurrentJointValues();
     visual_tools.loadRemoteControl();
+    group = PLANNING_GROUP;
 }
 
 geometry_msgs::Pose Arm::getCurrentPose()
@@ -64,6 +65,7 @@ void Arm::setMaxVelScalingFactor(double factor)
         move_group.setMaxVelocityScalingFactor(factor);
         ROS_INFO_NAMED("move_panda", "Velocity scaling factor set as %.2f", factor);
     }
+    vel_factor = factor;
 }
 
 void Arm::setPlanner(std::string planner)
@@ -99,28 +101,27 @@ void Arm::moveTargetPoseCon(geometry_msgs::Pose target_pose, bool step, bool exe
     if (orient_constraint == false && joint_constraint == false)
     {
         ROS_INFO_NAMED("move_group", "No constraint set");
+        return;
     }
 
-    else
+    move_group.setPathConstraints(path_constraints);
+    move_group.setPlanningTime(plan_time);
+
+    if (orient_constraint == true)
+    { //use orientation constraint as the target orientation, otherwise there will be error
+        ROS_INFO_NAMED("move_panda", "Orientaiton constraint will be set as target orientation");
+        target_pose.orientation.w = ocm.orientation.w;
+        target_pose.orientation.x = ocm.orientation.x;
+        target_pose.orientation.y = ocm.orientation.y;
+        target_pose.orientation.z = ocm.orientation.z;
+    }
+
+    if (step == true)
     {
-        move_group.setPathConstraints(path_constraints);
-        move_group.setPlanningTime(plan_time);
-
-        if (orient_constraint == true)
-        { //use orientation constraint as the target orientation, otherwise there will be error
-            ROS_INFO_NAMED("move_panda", "Orientaiton constraint will be set as target orientation");
-            target_pose.orientation.w = ocm.orientation.w;
-            target_pose.orientation.x = ocm.orientation.x;
-            target_pose.orientation.y = ocm.orientation.y;
-            target_pose.orientation.z = ocm.orientation.z;
-        }
-        if (step == true)
-        {
-            visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window");
-        }
-
-        moveTargetPose(target_pose, step, execute);
+        visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window");
     }
+
+    moveTargetPose(target_pose, step, execute);
 }
 
 void Arm::moveTargetJoint(std::vector<double> target_joint, bool step, bool execute)
@@ -179,6 +180,69 @@ void Arm::clearPathConstraint()
     move_group.setPlanningTime(default_plan_time);
     ROS_INFO_NAMED("move_panda", "Path constraint clear");
     orient_constraint = false;
+}
+
+void Arm::setWaypoints(geometry_msgs::Pose inter_pose)
+{ //set waypoints using intermediate poses
+    if (set_waypoints == false)
+    { //if set_waypoints == false, that means waypoints haven't been set.
+        //set the first pose in waypoints current pose
+        waypoints.push_back(move_group.getCurrentPose().pose);
+        set_waypoints = true;
+        ROS_INFO_NAMED("move_panda", "Current pose pushed to waypoints");
+    }
+    waypoints.push_back(inter_pose);
+    ROS_INFO_NAMED("move_panda", "Intermediate pose pushed to waypoints");
+}
+
+void Arm::moveCartesianPath(double jump_threshold, double eef_step, bool step, bool execute)
+{ //move robot according to cartesian path
+    if (waypoints.size() == 0)
+    {
+        ROS_INFO_NAMED("move_panda", "No waypoints found");
+        return;
+    }
+
+    moveit_msgs::RobotTrajectory trajectory;
+    double fraction = move_group.computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory); //compute the cartesian path
+    ROS_INFO_NAMED("move_panda", "Visualizing cartesian path (%.2f%% acheived)", fraction * 100.0);
+
+    //scale the trajectory according to the velocity factor (need more work at this section)
+    /*robot_model_loader::RobotModelLoader robot_model_loader(move_group.ROBOT_DESCRIPTION);
+    robot_model::RobotModelConstPtr robot_model = robot_model_loader.getModel();
+    robot_state::RobotState robot_state(robot_model);
+    trajectory_processing::IterativeParabolicTimeParameterization scale_time;
+    robot_trajectory::RobotTrajectory robot_traj(robot_model, group);
+    robot_traj.getRobotTrajectoryMsg(trajectory);
+    bool scale_traj = scale_time.computeTimeStamps(robot_traj, vel_factor); //scale the trajectory time steps as per the velocity factor
+    if (scale_traj == true)
+    {
+        ROS_INFO_NAMED("move_panda", "Trajectory scaled according to velocity factor %.2f", vel_factor);
+    }
+    else
+    {
+        ROS_INFO_NAMED("move_panda", "Trajecotry scaling failed. Velocity factor = 1.0 is used");
+    }
+    robot_traj.setRobotTrajectoryMsg(robot_state, trajectory);*/
+
+    plan.trajectory_ = trajectory;
+    if (step == true)
+    {
+        visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window");
+    }
+
+    if (execute == true)
+    {
+        move_group.execute(plan);
+        ROS_INFO_NAMED("move_panda", "Cartesian path exexuted");
+        if (step == true)
+        {
+            visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window");
+        }
+    }
+    waypoints.clear();
+    set_waypoints = false;
+    ROS_INFO_NAMED("move_panda", "Waypoints cleared");
 }
 
 //Hand class

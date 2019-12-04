@@ -29,7 +29,7 @@ int main(int argc, char **argv)
   //after planning.
   //If you don't specify them, default is true, false. It means that you
   //will need to use Next and moveit will plan but not execute the motion for you
-
+  
   arm.setMaxVelScalingFactor(0.1);                 //change joint speed
   arm.moveTargetPose(target_pose1, true, true);    //move to target pose
   arm.setMaxVelScalingFactor(1.2);                 //change joint speed, maximum is 1
@@ -50,11 +50,23 @@ int main(int argc, char **argv)
   arm.moveTargetPoseCon(arm_current_pose, true, true); //move to target pose with orientation constraint
   arm.clearPathConstraint();
 
-  arm.moveTargetJoint(arm.home_joint, false, true);
+  arm.moveTargetJoint(arm.home_joint, true, true);
   arm.setJointConstraint(arm.joint_names[1]);      //set panda_joint2 value as a joint constraint
   arm.moveTargetPoseCon(target_pose1, true, true); //move to target pose with joint constraint
   arm.clearPathConstraint();
-  arm.moveTargetJoint(arm.home_joint, false, true);
+  arm.moveTargetJoint(arm.home_joint, true, true);
+
+  geometry_msgs::Pose inter_pose1 = arm.getCurrentPose();
+  arm.setMaxVelScalingFactor(0.1);
+  inter_pose1.position.z -= 0.2;
+  arm.setWaypoints(inter_pose1);
+  inter_pose1.position.y -= 0.2;
+  arm.setWaypoints(inter_pose1);
+  inter_pose1.position.z += 0.2;
+  inter_pose1.position.y += 0.2;
+  inter_pose1.position.x -= 0.2;
+  arm.setWaypoints(inter_pose1);
+  arm.moveCartesianPath(0, 0.01, true, true);
 
   ros::shutdown();
   return 0;

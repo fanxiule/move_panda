@@ -71,6 +71,14 @@ The following funcitons are provided by this package:
 
             void clearPathConstraint()
 
+  - Set waypoints with the given intermediate pose by ``geometry_msgs::Pose inter_pose``. If this method is called the first time, the current pose will be set as the first waypoint when the intermediate pose will be set
+
+            void setWaypoints(geometry_msgs::Pose inter_pose);
+
+ - Compute a cartesian path as per the waypoints set by the previous method, and move the robot according to the path. The path is calculated based on the given ``double jump_threshold`` with default value ``0.0`` and ``double eef_step`` with default value ``0.01``
+
+            void moveCartesianPath(double jump_threshold = 0.0, double eef_step = 0.01, bool step = true, bool execute = false);
+
 - **Hand Class**
 
   - Constructor to initialize a move group to move the arm with given planning group (usually it is `"hand"`)
