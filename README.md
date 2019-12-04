@@ -75,7 +75,7 @@ The following funcitons are provided by this package:
 
             void setWaypoints(geometry_msgs::Pose inter_pose);
 
- - Compute a cartesian path as per the waypoints set by the previous method, and move the robot according to the path. The path is calculated based on the given ``double jump_threshold`` with default value ``0.0`` and ``double eef_step`` with default value ``0.01``
+  - Compute a cartesian path as per the waypoints set by the previous method, and move the robot according to the path. The path is calculated based on the given ``double jump_threshold`` with default value ``0.0`` and ``double eef_step`` with default value
 
             void moveCartesianPath(double jump_threshold = 0.0, double eef_step = 0.01, bool step = true, bool execute = false);
 
