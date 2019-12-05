@@ -29,7 +29,7 @@ int main(int argc, char **argv)
   //after planning.
   //If you don't specify them, default is true, false. It means that you
   //will need to use Next and moveit will plan but not execute the motion for you
-  
+
   arm.setMaxVelScalingFactor(0.1);                 //change joint speed
   arm.moveTargetPose(target_pose1, true, true);    //move to target pose
   arm.setMaxVelScalingFactor(1.2);                 //change joint speed, maximum is 1

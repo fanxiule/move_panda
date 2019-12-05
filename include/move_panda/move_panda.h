@@ -26,13 +26,13 @@ private:
     moveit_msgs::Constraints path_constraints;                 //path constraint
     std::string planning_frame;                                //planning frame of the robot
     std::string group;
-    std::vector<geometry_msgs::Pose> waypoints;                //store waypoints
-    bool success = false;                                      //if success == true, motion planning is successful
-    bool orient_constraint = false;                            //if orient_constraint == true, orientation constraint is set
-    bool joint_constraint = false;                             //if joint_constraint == true, joint constraint is set
-    bool set_waypoints = false;                                //if set_waypoints = true, waypoints have already been set
-    double default_plan_time;                                  //default planning time of the solver
-    double vel_factor;                                         //store volocity scaling factor
+    std::vector<geometry_msgs::Pose> waypoints; //store waypoints
+    bool success = false;                       //if success == true, motion planning is successful
+    bool orient_constraint = false;             //if orient_constraint == true, orientation constraint is set
+    bool joint_constraint = false;              //if joint_constraint == true, joint constraint is set
+    bool set_waypoints = false;                 //if set_waypoints = true, waypoints have already been set
+    double default_plan_time;                   //default planning time of the solver
+    double vel_factor;                          //store volocity scaling factor
 
 public:
     //public variables
@@ -60,7 +60,7 @@ public:
     void setJointConstraint(std::string joint_name, double upper_tol = 0.1, double lower_tol = 0.1, double weight = 1.0);     //set joint value constraint to the current joint value of a given joint
     void clearPathConstraint();                                                                                               //clear orientation constriant
     void setWaypoints(geometry_msgs::Pose inter_pose);                                                                        //set waypoints using intermediate poses
-    void moveCartesianPath(double jump_threshold = 0.0, double eef_step = 0.01, bool step = true, bool execute = false);        //move robot according to cartesian path
+    void moveCartesianPath(double jump_threshold = 0.0, double eef_step = 0.01, bool step = true, bool execute = false);      //move robot according to cartesian path
 };
 
 class Hand

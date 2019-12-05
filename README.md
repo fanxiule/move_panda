@@ -105,6 +105,6 @@ The following funcitons are provided by this package:
 
             void closeGripper(bool step = true, bool execute = false);
 
-  - Move gripper to the location specified by ``std::vector<double> target_gripper_value``
+  - Move gripper to the location specified by ``double target_gripper_value``
 
             void moveGripper(double target_gripper_value, bool step = true, bool execute = false)
